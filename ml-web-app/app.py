@@ -81,6 +81,49 @@ def upload_form():
     return render_template('home.html')
 
 
+@app.route('/retrain', methods=['POST'])
+def retrain_model():
+    error = None
+    if request.method == 'POST':
+        if request.form['input_field'] > '194':
+            corpus = []
+            labels = []
+            vals = []
+
+            print('In Progress...')
+            # Preprocess scam emails then convert them to number matrices and add it to final list of values to be run on.
+            for email in os.listdir('static/scam_emails'):
+                email_text = "static/scam_emails/" + email
+                return_string = EmailCleaner.email_reduction(email_text)  # Preprocess the email.
+                corpus.append(return_string)  # Add the reduced email to a list of emails.
+                val = TermFrequencyInverseDocumentFrequency.tf_idf([return_string])  # TF-IDF for a single email.
+                vals.append(val[0])  # TF-IDF matrix is a list of lists, so take the first list.
+                labels.append(1)  # 1 for scam.
+
+            print('In Progress...')
+            # Preprocess nonscam emails then convert them to number matrices and add it to final list of values to be run on.
+            for email in os.listdir('static/nonscam_emails'):
+                email_text = 'static/nonscam_emails/' + email
+                return_string = EmailCleaner.email_reduction(email_text)  # Preprocess the email.
+                corpus.append(return_string)  # Add the reduced email to a list of emails.
+                val = TermFrequencyInverseDocumentFrequency.tf_idf([return_string])  # TF-IDF for a single email.
+                vals.append(val[0])  # TF-IDF matrix is a list of lists, so take the first list.
+                labels.append(0)  # 0 for nonscam.
+
+            max_email_length = int(request.form['input_field'])  # Need to get the longest email length.
+            vals = feature_engineering(vals, max_email_length)
+
+            accuracy, report = SupportVectorMachine.svm(vals, labels)  # create model.
+            flash('The model has been successfully retrained. Here are the results:')
+            msg = f'Accuracy: {accuracy}'
+            flash(msg)
+            return render_template('model.html', tables=[report.to_html()])
+
+        elif request.form['input_field'] < '194':
+            error = 'Enter in a number greater than 194'
+            return render_template('model.html', error=error)
+
+
 @app.route('/', methods=['POST'])
 def upload_image():
     if 'file' not in request.files:

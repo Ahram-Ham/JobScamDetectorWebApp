@@ -49,6 +49,42 @@ p {
 		<a class="active" href="/model">Model</a>
 	</div>
 
+	<div class="content" align="center">
+		<h1>Model Reconfiguration</h1>
+	</div>
+
+	{% if error %}<p id="error">{{ error }}</p>{% endif %}
+
+	{% with messages = get_flashed_messages() %}
+		{% if messages %}
+
+		{% for message in messages %}
+		<h2 align="center">{{ message }}</h2>
+			{% endfor %}
+
+			{% endif %}
+			{% endwith %}
+
+	{% for table in tables %}
+    	<h2 align="center">Confusion Matrix</h2>
+		<div align="center">{{ table|safe }}</div>
+  	{% endfor %}
+
+	<h3 align="center">In the case that an email length may exceed 194 words, the model will require retraining. <br />
+			Enter in the email length that is greater than 194 words and click retrain to retrain the model.
+	</h3>
+	<form method="post" action="/retrain" align="center">
+		<dl>
+			<p>
+				<input type="text" name="input_field"/>
+			</p>
+			<p>
+				<button type="submit">retrain</button>
+			</p>
+		</dl>
+	</form>
+
+
 	<!-- Footer -->
 	<div class = "footer">
 	  	<a href="https://github.com/Ahram-Ham"  style="color:white">Ahram Ham</a>

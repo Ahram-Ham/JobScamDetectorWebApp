@@ -1,9 +1,11 @@
 from sklearn.svm import SVC
+from sklearn import metrics
 from joblib import dump
 import random
 from sklearn.metrics import accuracy_score, classification_report, confusion_matrix
 from sklearn.model_selection import StratifiedShuffleSplit
 import os
+import pandas as pd
 
 
 # Corpus contains tf-idf values, while labels contains binary numbers with 0 being a scam and 1 being a non-scam
@@ -20,8 +22,11 @@ def svm(corpus, labels):
     svm_classifier.fit(x_train, y_train)
     y_pred = svm_classifier.predict(x_test)
     accuracy = accuracy_score(y_test, y_pred)
-    report = classification_report(y_test, y_pred)
+    report = metrics.classification_report(y_test, y_pred, output_dict=True)
     confusion = confusion_matrix(y_test, y_pred)
+
+    df = pd.DataFrame(report).transpose()
+
     print(f'Accuracy: {accuracy}')
     print(report)
     print(confusion)
@@ -32,7 +37,9 @@ def svm(corpus, labels):
     except FileExistsError:
         pass
 
-    dump(svm_classifier, 'model/svm_model.joblib')
+    dump(svm_classifier, 'static/test_model/svm_model.joblib')
+
+    return accuracy, df
 
 
 def shuffle_data_and_labels(data, labels):
