@@ -37,7 +37,7 @@ def svm(corpus, labels):
     except FileExistsError:
         pass
 
-    dump(svm_classifier, 'static/test_model/svm_model.joblib')
+    dump(svm_classifier, 'static/model/svm_model.joblib')
 
     return accuracy, df
 
